@@ -1,32 +1,44 @@
+//상속, 다형성
+//추상클래스,Vector2D
+//물리, 키입력
+//https://app.diagrams.net/#HKSJ-cmd%2FSDL_HW1.25%2Fmain%2FUntitled%20Diagram.drawio
+
 #include <SDL.h>
+#include"Game.h"
+#include"InputHandler.h"
 
 SDL_Window* g_pWindow = 0;
 SDL_Renderer* g_pRenderer = 0;
+ const int SCREEN_WIDTH = 1600;
+ const int SCREEN_HEIGHT = 900;
+
+ const int FPS = 60;
+ const int DELAY_TIME = 1000.0f/FPS;
+Game* game = nullptr;
 
 int main(int argc, char* args[])
 {
- 
-   if (SDL_Init(SDL_INIT_EVERYTHING) >= 0) {
 
-        g_pWindow = SDL_CreateWindow("Setting up SDL",
-            SDL_WINDOWPOS_CENTERED,
-            SDL_WINDOWPOS_CENTERED,
-            640, 480, SDL_WINDOW_SHOWN);
+    game = Game::Instance();
+    game->Init("Game Class", 100, 100, SCREEN_WIDTH, SCREEN_HEIGHT, 0);
+    Uint32 frameStart, frameTime;
+    while (Game::Instance()->running()) {
 
-        if (g_pWindow != 0) {
-            g_pRenderer = SDL_CreateRenderer(g_pWindow, -1, 0);
+        frameStart = SDL_GetTicks();
+
+        Game::Instance()->handleEvents();
+        Game::Instance()->Update();
+        Game::Instance()->render();
+
+        frameTime = SDL_GetTicks() - frameStart;
+        if (frameTime < DELAY_TIME) {
+            SDL_Delay((int)(DELAY_TIME - frameTime));
         }
 
     }
-    else {
-        return 1;
-    }
-
-    SDL_SetRenderDrawColor(g_pRenderer, 0, 0, 0, 255);
-    SDL_RenderClear(g_pRenderer);
-    SDL_RenderPresent(g_pRenderer);
-
-    SDL_Delay(5000);
+    Game::Instance()->clean();
+    InputHandler::Instance()->clean();
+    SDL_Delay(500);
     SDL_Quit();
 
     return 0;
